@@ -1,8 +1,9 @@
 package org.example.controller;
 
-import org.example.model.Book;
 import org.example.model.SearchInput;
+import org.example.search.ParallelSearchService;
 import org.example.test.ParallelSearch;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/search")
 public class SearchController {
 
+    @Autowired
+    ParallelSearchService parallelSearchService;
+
 
 
     @GetMapping("/list")
@@ -34,7 +38,8 @@ public class SearchController {
     public RedirectView searchList(@ModelAttribute("book") SearchInput searchInput, RedirectAttributes redirectAttributes) throws ExecutionException, InterruptedException {
         var is = ParallelSearch.class.getClassLoader().getResourceAsStream("words.txt");
         var wordList = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.toList());
-        var result = ParallelSearch.parallelSearch(wordList, searchInput.getSearchString(), 4);
+        var result = parallelSearchService.search(searchInput);
+//        var result = ParallelSearch.parallelSearch(wordList, searchInput.getSearchString(), 4);
         final RedirectView redirectView = new RedirectView("/search/list", true);
         redirectAttributes.addFlashAttribute("searchListSuccess", true);
         redirectAttributes.addFlashAttribute("searchedInput", new SearchInput());
