@@ -6,7 +6,7 @@
         <title>Suche</title>
     </head>
     <body>
-        <c:url var="search_list_url" value="/search/list"/>
+        <c:url var="search_list_url" value="/list/search"/>
         <form:form action="${search_list_url}" method="post" modelAttribute="searchInput">
             <form:label path="searchString">Suchbegriff: </form:label> <form:input type="text" path="searchString"/>
             <input type="submit" value="submit"/>

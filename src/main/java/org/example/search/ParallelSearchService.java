@@ -53,9 +53,11 @@ public class ParallelSearchService {
         for (Future<List<String>> future : futures) {
             hits.addAll(future.get());
         }
-        executor.shutdown();
-
         return hits;
+    }
+
+    public List<String> searchLive(SearchInput searchInput) throws ExecutionException, InterruptedException {
+        return List.of("foo", "bar");
     }
 
     private List<String> readWordList(String filename) {
