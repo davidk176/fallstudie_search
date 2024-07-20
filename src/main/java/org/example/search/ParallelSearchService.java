@@ -1,9 +1,7 @@
 package org.example.search;
 
-import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import org.example.model.SearchInput;
-import org.example.test.ParallelSearch;
+import org.example.model.SearchResult;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -33,7 +31,8 @@ public class ParallelSearchService {
         this.wordList = readWordList("words.txt");
     }
 
-    public List<String> search(SearchInput searchInput) throws ExecutionException, InterruptedException {
+    public SearchResult search(SearchInput searchInput) throws ExecutionException, InterruptedException {
+        long start = System.currentTimeMillis();
         int chunkSize = (int) Math.ceil((double) wordList.size() / numberOfThreads); //round up chunk size
         List<Future<List<String>>> futures = new ArrayList<>();
 
@@ -49,23 +48,22 @@ public class ParallelSearchService {
             futures.add(executor.submit(worker));
         }
 
-        var hits = new ArrayList<String>();
+        var result = new ArrayList<String>();
         for (Future<List<String>> future : futures) {
-            hits.addAll(future.get());
+            result.addAll(future.get());
         }
-        return hits;
-    }
-
-    public List<String> searchLive(SearchInput searchInput) throws ExecutionException, InterruptedException {
-        return List.of("foo", "bar");
+        return SearchResult.builder()
+                .result(result)
+                .successful(true)
+                .took(System.currentTimeMillis() - start)
+                .hits(result.size())
+                .build();
     }
 
     private List<String> readWordList(String filename) {
-        var is = ParallelSearch.class.getClassLoader().getResourceAsStream(filename);
+        var is = this.getClass().getClassLoader().getResourceAsStream(filename);
         var wordList = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.toList());
         Collections.shuffle(wordList);
         return wordList;
     }
-
-
 }

@@ -1,0 +1,42 @@
+@startuml
+class SearchWorker {
+- String searchString
+- List<String> wordList
++ List<String> call()
+}
+
+
+class ParallelSearchService {
+- int numberOfThreads
+- ExecutorService executor
+- List<String> wordList
++ SearchResult search(SearchInput)
+- List<String> readWordList(String)
+}
+
+class SearchResult {
+- List<String> result
+- long took
+- long hits
+- boolean successful
+}
+
+class SearchController {
+~ ParallelSearchService parallelSearchService
++ String addSearchView(Model)
++ RedirectView searchList(SearchInput,RedirectAttributes)
+}
+
+class SearchInput {
+- String searchString
+}
+
+interface Callable
+
+Callable <|.. SearchWorker
+SearchController o-- ParallelSearchService
+ParallelSearchService o-- SearchWorker
+ParallelSearchService o-- SearchInput
+ParallelSearchService o-- SearchResult
+
+@enduml

@@ -11,8 +11,9 @@
             <form:label path="searchString">Suchbegriff: </form:label> <form:input type="text" path="searchString"/>
             <input type="submit" value="submit"/>
         </form:form>
-        <c:if test="${searchListSuccess}">
-            <div>Treffer: ${result}</div>
+        <c:if test="${result.isSuccessful()}">
+            <div>Found ${result.getHits()} hits in ${result.getTook()} ms</div>
+            <div>Result: ${result.getResult()}</div>
         </c:if>
     </body>
 </html>
