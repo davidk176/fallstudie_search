@@ -8,7 +8,7 @@
     <body>
         <c:url var="search_list_url" value="/list/search"/>
         <form:form action="${search_list_url}" method="post" modelAttribute="searchInput">
-            <form:label path="searchString">Suchbegriff: </form:label> <form:input type="text" path="searchString"/>
+            <form:label path="searchString">Search: </form:label> <form:input type="text" path="searchString"/>
             <input type="submit" value="submit"/>
         </form:form>
         <c:if test="${result.isSuccessful()}">

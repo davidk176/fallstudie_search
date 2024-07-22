@@ -11,6 +11,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 @Controller
 @RequestMapping("/list")
@@ -26,7 +27,7 @@ public class SearchController {
     }
 
     @PostMapping("/search")
-    public RedirectView searchList(@ModelAttribute("searchInput") SearchInput searchInput, RedirectAttributes redirectAttributes) throws ExecutionException, InterruptedException {
+    public RedirectView searchList(@ModelAttribute("searchInput") SearchInput searchInput, RedirectAttributes redirectAttributes) throws ExecutionException, InterruptedException, TimeoutException {
         var result = parallelSearchService.search(searchInput);
         final RedirectView redirectView = new RedirectView("/list/search", true);
         redirectAttributes

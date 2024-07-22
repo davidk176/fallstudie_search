@@ -1,5 +1,6 @@
 package org.example.search;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.model.SearchInput;
 import org.example.model.SearchResult;
 import org.springframework.stereotype.Service;
@@ -10,13 +11,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ParallelSearchService {
 
     private final int numberOfThreads;
@@ -28,13 +27,14 @@ public class ParallelSearchService {
     public ParallelSearchService() {
         this.numberOfThreads = Runtime.getRuntime().availableProcessors();
         this.executor = Executors.newFixedThreadPool(numberOfThreads);
-        this.wordList = readWordList("words.txt");
+        this.wordList = readWordList("wordlist-german.txt");
     }
 
-    public SearchResult search(SearchInput searchInput) throws ExecutionException, InterruptedException {
+    public SearchResult search(SearchInput searchInput) throws ExecutionException, InterruptedException, TimeoutException {
         long start = System.currentTimeMillis();
         int chunkSize = (int) Math.ceil((double) wordList.size() / numberOfThreads); //round up chunk size
         List<Future<List<String>>> futures = new ArrayList<>();
+        log.info("Searching for string {}, numberOfThreads={} chunkSize={}", searchInput.getSearchString(), numberOfThreads, chunkSize);
 
         for (int i = 0; i < numberOfThreads; i++) {
             int startIndex = i * chunkSize;
@@ -50,7 +50,7 @@ public class ParallelSearchService {
 
         var result = new ArrayList<String>();
         for (Future<List<String>> future : futures) {
-            result.addAll(future.get());
+            result.addAll(future.get(60, TimeUnit.SECONDS));
         }
         return SearchResult.builder()
                 .result(result)
@@ -64,6 +64,7 @@ public class ParallelSearchService {
         var is = this.getClass().getClassLoader().getResourceAsStream(filename);
         var wordList = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.toList());
         Collections.shuffle(wordList);
+        log.info("Loaded wordlist {} with size {}", filename, wordList.size());
         return wordList;
     }
 }
